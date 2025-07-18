@@ -1,0 +1,25 @@
+-- Ada Result Library Async Performance Benchmark Project File
+-- Copyright (c) 2025 A Bit of Help, Inc.
+-- SPDX-License-Identifier: MIT
+
+with "../async_result.gpr";
+with "config/async_integration_test_config.gpr";
+
+project Async_Performance_Benchmark is
+
+   for Source_Dirs use (".");
+   for Object_Dir use "../obj/async_performance_benchmark";
+   for Exec_Dir use ".";
+   for Main use ("async_performance_benchmark.adb");
+
+   package Compiler renames Async_Integration_Test_Config.Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); -- Symbolic traceback
+   end Binder;
+
+   package Linker is
+      for Switches ("Ada") use ("-lpthread"); -- Link with pthread for task support
+   end Linker;
+
+end Async_Performance_Benchmark;

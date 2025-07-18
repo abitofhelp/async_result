@@ -1,0 +1,57 @@
+-- Ada Result Library Async Integration Test Configuration
+-- Copyright (c) 2025 A Bit of Help, Inc.
+-- SPDX-License-Identifier: MIT
+
+abstract project Async_Integration_Test_Config is
+
+   -- Build profile configuration
+   type Profile_Type is ("development", "validation", "release");
+   Build_Profile : Profile_Type := external ("BUILD_PROFILE", "development");
+
+   -- Compiler switches for different profiles
+   package Compiler is
+      case Build_Profile is
+         when "development" =>
+            for Default_Switches ("Ada") use (
+               "-gnat2022",           -- Use Ada 2022 standard
+               "-gnata",              -- Enable assertions
+               "-gnateE",             -- Enable extra exception information
+               "-gnatE",              -- Enable dynamic elaboration checks
+               "-gnato",              -- Enable overflow checks
+               "-gnatU",              -- Enable unreachable code detection
+               "-gnatf",              -- Full error messages
+               "-gnatwa",             -- Enable all warnings
+               "-gnatwl",             -- Enable warnings for elaboration
+               "-g",                  -- Debug information
+               "-O0"                  -- No optimization
+            );
+
+         when "validation" =>
+            for Default_Switches ("Ada") use (
+               "-gnat2022",           -- Use Ada 2022 standard
+               "-gnata",              -- Enable assertions
+               "-gnateE",             -- Enable extra exception information
+               "-gnatE",              -- Enable dynamic elaboration checks
+               "-gnato",              -- Enable overflow checks
+               "-gnatVa",             -- Enable all validity checks
+               "-gnatf",              -- Full error messages
+               "-gnatwa",             -- Enable all warnings
+               "-gnatwl",             -- Enable warnings for elaboration
+               "-g",                  -- Debug information
+               "-O1"                  -- Light optimization
+            );
+
+         when "release" =>
+            for Default_Switches ("Ada") use (
+               "-gnat2022",           -- Use Ada 2022 standard
+               "-gnatp",              -- Suppress runtime checks
+               "-gnatn",              -- Enable inlining
+               "-O2",                 -- Optimize for performance
+               "-g1"                  -- Minimal debug info
+            );
+      end case;
+   end Compiler;
+
+   for Source_Dirs use ();
+
+end Async_Integration_Test_Config;
