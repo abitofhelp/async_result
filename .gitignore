@@ -18,6 +18,26 @@ alire.lock
 # Test executables
 test_result
 comprehensive_test_result
+async_integration_test
+async_performance_benchmark
+memory_leak_test
+error_recovery_test
+simple_async_test
+test_new_structure
+tests/*
+!tests/*.adb
+!tests/*.ads
+!tests/*.gpr
+!tests/config/
+
+# Debug and temporary test files in root
+debug_*
+test_hang*
+minimal_*
+hang_*
+*.gpr
+!async_result.gpr
+!tests/*.gpr
 
 # IDE and editor files
 .vscode/
@@ -48,7 +68,12 @@ docs/_build/
 
 # Backup files
 *.backup
+*.bak
+*.orig
+*.old
 *~
+src/*.backup
+src/*.original
 
 # Coverage reports
 coverage/

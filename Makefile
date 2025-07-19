@@ -78,6 +78,8 @@ help:
 	@echo "$(YELLOW)🧹 Clean Commands:$(NC)"
 	@echo "  $(GREEN)clean$(NC)              - Clean build artifacts"
 	@echo "  $(GREEN)clean-all$(NC)          - Clean everything including dependencies"
+	@echo "  $(GREEN)clean-temp$(NC)         - Clean temporary files (backups, logs, etc.)"
+	@echo "  $(GREEN)pristine$(NC)           - Restore project to pristine state"
 	@echo "  $(GREEN)dev-clean$(NC)          - Clean development artifacts"
 	@echo "  $(GREEN)distclean$(NC)          - Complete clean for distribution"
 	@echo ""
@@ -169,16 +171,29 @@ profile:
 # Clean targets
 .PHONY: clean
 clean:
-	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
+	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
 	@alr clean
 	@rm -rf obj/ lib/ tests/async_integration_test tests/memory_leak_test tests/error_recovery_test
-	@echo "$(GREEN)Clean completed$(NC)"
+	@echo "$(GREEN)✅ Clean completed$(NC)"
 
 .PHONY: clean-all
 clean-all: clean
-	@echo "$(BLUE)Cleaning all artifacts including dependencies...$(NC)"
+	@echo "$(BLUE)🧹 Cleaning all artifacts including dependencies...$(NC)"
 	@rm -rf alire/cache/ alire/tmp/ doc/api/
-	@echo "$(GREEN)Deep clean completed$(NC)"
+	@echo "$(GREEN)✅ Deep clean completed$(NC)"
+
+.PHONY: clean-temp
+clean-temp:
+	@echo "$(BLUE)🧹 Cleaning temporary files...$(NC)"
+	@tools/cleanup.sh
+	@echo "$(GREEN)✅ Temporary files cleaned$(NC)"
+
+.PHONY: pristine
+pristine:
+	@echo "$(BLUE)🧹 Restoring to pristine state...$(NC)"
+	@tools/cleanup.sh
+	@rm -rf alire/cache/ alire/dependencies/
+	@echo "$(GREEN)✅ Project restored to pristine state$(NC)"
 
 # Test targets
 .PHONY: test-build
