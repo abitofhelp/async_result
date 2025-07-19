@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We take security seriously and provide security updates for the following versions of the Ada Result Library:
+We take security seriously and provide security updates for the following versions of the Ada Async_Result Library:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -15,14 +15,14 @@ We take security seriously and provide security updates for the following versio
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-If you discover a security vulnerability in the Ada Result Library, please report it responsibly by following these steps:
+If you discover a security vulnerability in the Ada Async_Result Library, please report it responsibly by following these steps:
 
 ### 1. Private Disclosure
 
 Send a detailed report to our security team:
 
 - **Email**: mjgardner@abitofhelp.com
-- **Subject**: [SECURITY] Ada Result Library - Vulnerability Report
+- **Subject**: [SECURITY] Ada Async_Result Library - Vulnerability Report
 - **GitHub**: You can also create a private security advisory through GitHub's security tab
 
 ### 2. What to Include
@@ -49,7 +49,7 @@ We are committed to responding to security reports promptly:
 
 ### Memory Safety
 
-The Ada Result Library is designed with memory safety as a core principle:
+The Ada Async_Result Library is designed with memory safety as a core principle:
 
 - **Automatic Memory Management**: Uses Ada's controlled types for deterministic cleanup
 - **RAII Guarantees**: Resources are automatically released when objects go out of scope
@@ -95,7 +95,7 @@ When using this library, be aware of these security considerations:
 
 ## Security Best Practices
 
-When using the Ada Result Library:
+When using the Ada Async_Result Library:
 
 ### 1. Keep Dependencies Updated
 ```bash
@@ -150,7 +150,7 @@ end Safe_Operation;
 
 This security policy applies to:
 
-- The core Ada Result Library code
+- The core Ada Async_Result Library code
 - Build scripts and configuration files
 - Documentation that could impact security
 - Examples and test code that demonstrate security-relevant patterns
@@ -184,7 +184,7 @@ For security-related questions or concerns:
 
 ## Acknowledgments
 
-We would like to thank the security researchers and community members who help keep the Ada Result Library secure through responsible disclosure of vulnerabilities.
+We would like to thank the security researchers and community members who help keep the Ada Async_Result Library secure through responsible disclosure of vulnerabilities.
 
 ---
 

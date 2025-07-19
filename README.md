@@ -1,7 +1,7 @@
 # Ada Async_Result Library
 
 > **📦 Part of the Ada Result Ecosystem**  
-> This is the **asynchronous** Result library. For synchronous operations, see the companion [**result**](https://github.com/abitofhelp/result) package.
+> This is the **asynchronous** Async_Result library. For synchronous operations, see the companion [**result**](https://github.com/abitofhelp/result) package.
 
 A high-performance, memory-safe Async_Result type library for Ada that provides type-safe error handling without exceptions in concurrent environments. Inspired by Rust's `Result<T, E>` and functional programming's `Either` patterns, enhanced with Ada's powerful concurrency features for asynchronous operations.
 
@@ -9,44 +9,87 @@ A high-performance, memory-safe Async_Result type library for Ada that provides 
 
 ## Quick Start
 
-```ada
-with Async_Result;
+### Option 1: Using Pre-instantiated Types (Easiest)
 
-procedure Example is
+```ada
+with Async_Result.Prelude; use Async_Result.Prelude;
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure Quick_Example is
+   R : Int_Result;
+begin
+   -- Create results
+   Integer_Result.Make_Ok (R, 42);
+   
+   -- Check and use
+   if Integer_Result.Is_Ok (R) then
+      Put_Line ("Value: " & Integer'Image (Integer_Result.Unwrap (R)));
+   end if;
+end Quick_Example;
+```
+
+### Option 2: Custom Types with Full Features
+
+```ada
+with Async_Result.Core;
+with Async_Result.Async;
+
+procedure Custom_Example is
    type Math_Error is (Division_By_Zero, Overflow);
    
-   package Integer_Result is new Async_Result (Integer, Math_Error);
-   use Integer_Result;
+   -- Instantiate core package
+   package Math_Result is new Async_Result.Core (
+      Value_Type => Integer,
+      Error_Type => Math_Error,
+      Copy_Value => Copy_Integer,
+      Copy_Error => Copy_Math_Error,
+      Default_Value => Default_Integer,
+      Default_Error => Default_Math_Error
+   );
    
-   procedure Safe_Divide (A, B : Integer; R : out Result_Type) is
+   -- Instantiate async package
+   package Math_Async is new Async_Result.Async (Core => Math_Result);
+   
+   procedure Safe_Divide (A, B : Integer; R : out Math_Result.Result_Type) is
    begin
       if B = 0 then
-         Make_Err (R, Division_By_Zero, "Cannot divide by zero");
+         Math_Result.Make_Err (R, Division_By_Zero, "Cannot divide by zero");
       else
-         Make_Ok (R, A / B);
+         Math_Result.Make_Ok (R, A / B);
       end if;
    end Safe_Divide;
    
-   -- Async operation example
-   My_Result : Result_Type;
-   Async_Op : Async_Map_Operations.Async_Map_Result_Type;
-   Final_Result : Result_Type;
+   -- Example with async operation
+   procedure Double (Input : Integer; Output : out Integer) is
+   begin
+      Output := Input * 2;
+   end Double;
+   
+   package Async_Double is new Math_Async.Async_Map_Operations (
+      New_Value_Type => Integer,
+      Transform => Double,
+      Copy_New_Value => Copy_Integer,
+      Default_New_Value => Default_Integer
+   );
+   
+   My_Result : Math_Result.Result_Type;
+   Async_Op : Async_Double.Async_Map_Result_Type;
+   Final_Result : Async_Double.New_Result_Type;
 begin
    Safe_Divide (10, 2, My_Result);
    
    -- Start async transformation
-   Async_Map_Operations.Start_Async_Map (My_Result, Async_Op);
+   Async_Double.Start_Async_Map (My_Result, Async_Op);
    
    -- Do other work while operation executes...
    
    -- Get result when ready
-   Async_Map_Operations.Wait_For_Result (Async_Op, Final_Result);
+   Async_Double.Wait_For_Transformed_Result (Async_Op, Final_Result);
    
-   if Is_Ok (Final_Result) then
-      -- Handle successful async result
-      null;
+   if Async_Double.Is_Ok (Final_Result) then
+      Ada.Text_IO.Put_Line ("Result: " & Integer'Image (Async_Double.Unwrap (Final_Result)));
    end if;
-end Example;
+end Custom_Example;
 ```
 
 ## Requirements
@@ -89,7 +132,7 @@ make build
 - **Cancellation mechanisms** for cooperative task termination
 
 ### 🔒 **Thread Safety**
-- **Protected Result types** for shared state management
+- **Protected Async_Result types** for shared state management
 - **Atomic operations** for metrics and counters
 - **Deadlock-free design** with proper lock ordering
 - **Exception safety** in concurrent contexts
@@ -111,6 +154,115 @@ make build
 - **Performance monitoring** with execution time tracking
 - **Health monitoring** for task pools and workers
 - **Debug support** with detailed state inspection
+
+## Package Architecture
+
+The Async_Result library follows a modular architecture with clear separation of concerns:
+
+### 📦 **Package Structure**
+
+```
+Async_Result
+├── Async_Result           -- Root namespace package
+├── Async_Result.Core      -- Basic Result types and operations
+├── Async_Result.Async     -- Asynchronous operations and futures
+├── Async_Result.Pool      -- Work-stealing thread pool
+├── Async_Result.Metrics   -- Performance monitoring and metrics
+├── Async_Result.Simple    -- Simplified API for common use cases
+└── Async_Result.Prelude   -- Pre-instantiated types for quick start
+```
+
+### **Async_Result.Core**
+The foundation package providing:
+- Basic `Result_Type` with success/error states
+- Core operations: `Make_Ok`, `Make_Err`, `Is_Ok`, `Is_Err`
+- Safe extraction: `Unwrap`, `Unwrap_Or`, `Try_Get_Value`
+- Pattern matching and transformation operations
+- Thread-safe `Protected_Result_Type`
+
+### **Async_Result.Async**
+Asynchronous operations including:
+- `Async_Map_Operations` for non-blocking transformations
+- Future-like types for deferred computation
+- Async combinators: `Wait_All`, `Wait_Any`, `Race`
+- Cancellation tokens and timeout configuration
+- Pipeline operations for chained async transformations
+
+### **Async_Result.Pool**
+High-performance work-stealing pool featuring:
+- Dynamic worker management
+- Backpressure control policies
+- Queue resizing and load balancing
+- Comprehensive pool metrics
+- Priority work items support
+
+### **Async_Result.Metrics**
+Monitoring and observability tools:
+- Thread-safe atomic counters and gauges
+- Timing and histogram support
+- Comprehensive metric collection
+- Alert configuration and thresholds
+- Export formats: CSV, JSON, Prometheus
+
+### **Async_Result.Simple**
+Beginner-friendly API with:
+- Simplified function names: `Ok`, `Err`, `Value`, `Error`
+- Reduced boilerplate for common operations
+- Pre-configured defaults
+- Easy chaining operations
+
+### **Async_Result.Prelude**
+Ready-to-use instantiations for:
+- `Integer_Result`, `String_Result`, `Float_Result`, `Boolean_Result`
+- Common error types and helpers
+- Quick start without generic instantiation
+
+### 🎯 **Usage Guidelines**
+
+1. **For new projects**: Start with `Async_Result.Prelude` for common types
+2. **For simple use cases**: Use `Async_Result.Simple` for reduced complexity
+3. **For advanced features**: Import specific packages as needed
+4. **For performance-critical code**: Use `Async_Result.Core` directly
+
+### 📝 **Example: Using the Modular Structure**
+
+```ada
+-- Option 1: Use pre-instantiated types
+with Async_Result.Prelude; use Async_Result.Prelude;
+
+procedure Example_Prelude is
+   R : Int_Result;
+begin
+   Integer_Result.Make_Ok (R, 42);
+   if Integer_Result.Is_Ok (R) then
+      Put_Line (Integer'Image (Integer_Result.Unwrap (R)));
+   end if;
+end Example_Prelude;
+
+-- Option 2: Use simplified API
+with Async_Result.Simple;
+
+procedure Example_Simple is
+   package Simple_Int is new Async_Result.Simple (Integer, String);
+   use Simple_Int;
+   
+   R : Result := Ok (42);
+begin
+   Put_Line (Integer'Image (Value_Or (R, 0)));
+end Example_Simple;
+
+-- Option 3: Custom instantiation with specific packages
+with Async_Result.Core;
+with Async_Result.Async;
+
+procedure Example_Custom is
+   package My_Result is new Async_Result.Core (...);
+   package My_Async is new Async_Result.Async (Core => My_Result);
+begin
+   -- Use custom types with full control
+   null;
+end Example_Custom;
+```
 
 ## Core API
 
@@ -493,7 +645,7 @@ end;
 1. **Async for I/O-bound operations**: Use async operations for network, file, or database operations
 2. **Sync for CPU-bound operations**: Use sync operations for pure computations
 3. **Proper resource management**: Always use controlled types for resource cleanup
-4. **Error propagation**: Let errors propagate naturally through the Result chain
+4. **Error propagation**: Let errors propagate naturally through the Async_Result chain
 5. **Timeout handling**: Always set reasonable timeouts for async operations
 6. **Monitoring**: Monitor metrics in production environments
 

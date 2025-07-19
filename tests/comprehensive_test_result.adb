@@ -1,10 +1,10 @@
 -- =============================================================================
--- Ada Result Library
+-- Ada Async_Result Library
 -- Copyright (c) 2025 A Bit of Help, Inc.
 -- SPDX-License-Identifier: MIT
 --
--- High-performance, memory-safe Result type for Ada providing type-safe error
--- handling without exceptions. Part of the Ada Result ecosystem.
+-- High-performance, memory-safe Async_Result type for Ada providing type-safe error
+-- handling without exceptions. Part of the Ada Async_Result ecosystem.
 --
 -- For full license text, see LICENSE.md
 -- For documentation, see README.md
@@ -1263,7 +1263,7 @@ procedure Comprehensive_Test_Result is
    end Test_Enhanced_Transformation_Safety;
 
 begin
-   Put_Line ("Result Library - Comprehensive Test Suite");
+   Put_Line ("Async_Result Library - Comprehensive Test Suite");
    Put_Line ("============================================");
    New_Line;
 

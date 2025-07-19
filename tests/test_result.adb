@@ -1,10 +1,10 @@
 -- =============================================================================
--- Ada Result Library
+-- Ada Async_Result Library
 -- Copyright (c) 2025 A Bit of Help, Inc.
 -- SPDX-License-Identifier: MIT
 --
--- High-performance, memory-safe Result type for Ada providing type-safe error
--- handling without exceptions. Part of the Ada Result ecosystem.
+-- High-performance, memory-safe Async_Result type for Ada providing type-safe error
+-- handling without exceptions. Part of the Ada Async_Result ecosystem.
 --
 -- For full license text, see LICENSE.md
 -- For documentation, see README.md
@@ -34,7 +34,7 @@ procedure Test_Result is
    Value : Integer;
    
 begin
-   Put_Line ("Testing Result Library - Basic Functionality");
+   Put_Line ("Testing Async_Result Library - Basic Functionality");
    
    -- Test Make_Ok
    Integer_Result.Make_Ok (R, 42);

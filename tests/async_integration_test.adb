@@ -1,5 +1,5 @@
 -- =============================================================================
--- Ada Result Library - Async Integration Tests
+-- Ada Async_Result Library - Async Integration Tests
 -- Copyright (c) 2025 A Bit of Help, Inc.
 -- SPDX-License-Identifier: MIT
 --
@@ -170,7 +170,7 @@ procedure Async_Integration_Test is
       declare
          Input_Result : Integer_Result.Result_Type;
          Async_Op : Integer_Async_Map.Async_Map_Result_Type;
-         Final_Result : Integer_Result.Result_Type;
+         Final_Result : Integer_Async_Map.New_Result_Type;
          Start_Time : Time;
          Execution_Time : Duration;
       begin
@@ -183,11 +183,11 @@ procedure Async_Integration_Test is
          Assert (Integer_Async_Map.Get_Status (Async_Op) = Pending, "Initial status is Pending");
          
          -- Wait for completion
-         Integer_Async_Map.Wait_For_Result (Async_Op, Final_Result);
+         Integer_Async_Map.Wait_For_Transformed_Result (Async_Op, Final_Result);
          Execution_Time := Clock - Start_Time;
          
-         Assert (Integer_Result.Is_Ok (Final_Result), "Async map produces success result");
-         Assert (Integer_Result.Unwrap (Final_Result) = 42, "Async map transforms value correctly");
+         Assert (Integer_Async_Map.Is_Ok (Final_Result), "Async map produces success result");
+         Assert (Integer_Async_Map.Unwrap (Final_Result) = 42, "Async map transforms value correctly");
          Assert (Integer_Async_Map.Get_Status (Async_Op) = Completed, "Final status is Completed");
          Assert (Execution_Time > 0.001, "Async operation takes measurable time");
          
@@ -204,19 +204,19 @@ procedure Async_Integration_Test is
       declare
          Input_Result : Integer_Result.Result_Type;
          Async_Op : Integer_Async_Map.Async_Map_Result_Type;
-         Final_Result : Integer_Result.Result_Type;
+         Final_Result : Integer_Async_Map.New_Result_Type;
          Timed_Out : Boolean;
       begin
          Integer_Result.Make_Ok (Input_Result, 100);
          Integer_Async_Map.Start_Async_Map (Input_Result, Async_Op);
          
          -- Test timeout with very short timeout
-         Integer_Async_Map.Wait_For_Result_With_Timeout (Async_Op, Final_Result, 0.001, Timed_Out);
+         Integer_Async_Map.Wait_For_Transformed_Result_With_Timeout (Async_Op, Final_Result, 0.001, Timed_Out);
          
          if Timed_Out then
             Assert (True, "Timeout mechanism works correctly");
          else
-            Assert (Integer_Result.Is_Ok (Final_Result), "Fast operation completes within timeout");
+            Assert (Integer_Async_Map.Is_Ok (Final_Result), "Fast operation completes within timeout");
          end if;
       end;
 
@@ -224,7 +224,7 @@ procedure Async_Integration_Test is
       declare
          Input_Result : Integer_Result.Result_Type;
          Async_Op : Integer_Async_Map.Async_Map_Result_Type;
-         Final_Result : Integer_Result.Result_Type;
+         Final_Result : Integer_Async_Map.New_Result_Type;
       begin
          Integer_Result.Make_Ok (Input_Result, 200);
          Integer_Async_Map.Start_Async_Map (Input_Result, Async_Op);
@@ -233,7 +233,7 @@ procedure Async_Integration_Test is
          Integer_Async_Map.Cancel (Async_Op);
          
          -- Try to get result after cancellation
-         if Integer_Async_Map.Try_Get_Result (Async_Op, Final_Result) then
+         if Integer_Async_Map.Try_Get_Transformed_Result (Async_Op, Final_Result) then
             Assert (Integer_Async_Map.Get_Status (Async_Op) = Cancelled, "Cancelled operation has correct status");
          else
             Assert (True, "Cancelled operation doesn't return result");
@@ -479,11 +479,11 @@ procedure Async_Integration_Test is
                declare
                   Input_Result : Integer_Result.Result_Type;
                   Async_Op : Integer_Async_Map.Async_Map_Result_Type;
-                  Final_Result : Integer_Result.Result_Type;
+                  Final_Result : Integer_Async_Map.New_Result_Type;
                begin
                   Integer_Result.Make_Ok (Input_Result, I);
                   Integer_Async_Map.Start_Async_Map (Input_Result, Async_Op);
-                  Integer_Async_Map.Wait_For_Result (Async_Op, Final_Result);
+                  Integer_Async_Map.Wait_For_Transformed_Result (Async_Op, Final_Result);
                end;
             end loop;
          end Metrics_Generator;

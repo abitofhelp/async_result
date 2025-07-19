@@ -7,7 +7,7 @@ PROJECT_NAME = async_result
 VERSION = 0.1.0-dev
 ALIRE_TOML = alire.toml
 MAIN_SOURCE = src/async_result.ads
-TEST_SOURCE = tests_crate/comprehensive_test_result.adb
+TEST_SOURCE = tests/comprehensive_test_result.adb
 DOC_DIR = doc
 BUILD_DIR = build
 COVERAGE_DIR = coverage
@@ -171,7 +171,7 @@ profile:
 clean:
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"
 	@alr clean
-	@rm -rf obj/ lib/ tests_crate/async_integration_test tests_crate/memory_leak_test tests_crate/error_recovery_test
+	@rm -rf obj/ lib/ tests/async_integration_test tests/memory_leak_test tests/error_recovery_test
 	@echo "$(GREEN)Clean completed$(NC)"
 
 .PHONY: clean-all
@@ -184,9 +184,9 @@ clean-all: clean
 .PHONY: test-build
 test-build:
 	@echo "$(BLUE)🔨 Building test executable...$(NC)"
-	@mkdir -p tests_crate/obj
+	@mkdir -p tests/obj
 	@if command -v alr > /dev/null 2>&1; then \
-		cd tests_crate && alr exec -- gprbuild -P test.gpr -p; \
+		alr build --profiles=$(PROJECT_NAME)=$(PROFILE_DEV) && cd tests && alr exec -- gprbuild -P test.gpr -p; \
 	else \
 		echo "$(RED)❌ alr not found. Please install Alire$(NC)"; \
 		exit 1; \
@@ -196,27 +196,27 @@ test-build:
 .PHONY: test
 test: test-build
 	@echo "$(BLUE)🧪 Running tests...$(NC)"
-	@cd tests_crate && ./simple_async_test
+	@cd tests && ./comprehensive_test_result
 	@echo "$(GREEN)✅ Tests completed$(NC)"
 
 .PHONY: test-unit
 test-unit: test-build
 	@echo "$(BLUE)🧪 Running unit tests...$(NC)"
-	@cd tests_crate && alr exec -- ./async_integration_test --unit-only
+	@cd tests && ./comprehensive_test_result
 	@echo "$(GREEN)✅ Unit tests completed$(NC)"
 
 .PHONY: test-integration
 test-integration: test-build
 	@echo "$(BLUE)🧪 Running integration tests...$(NC)"
-	@cd tests_crate && alr exec -- ./async_integration_test --integration-only
+	@cd tests && ./async_integration_test
 	@echo "$(GREEN)✅ Integration tests completed$(NC)"
 
 .PHONY: test-watch
 test-watch:
 	@echo "$(BLUE)👀 Running tests in watch mode...$(NC)"
-	@echo "$(YELLOW)Watching for changes in src/ and tests_crate/...$(NC)"
+	@echo "$(YELLOW)Watching for changes in src/ and tests/...$(NC)"
 	@if command -v entr > /dev/null 2>&1; then \
-		find src/ tests_crate/ -name "*.ad[sb]" | entr -c make test; \
+		find src/ tests/ -name "*.ad[sb]" | entr -c make test; \
 	else \
 		echo "$(RED)❌ entr not found. Install with: brew install entr (macOS) or apt-get install entr (Ubuntu)$(NC)"; \
 	fi
@@ -227,8 +227,8 @@ test-coverage:
 	@echo "$(YELLOW)Analyzing Async_Result library API coverage...$(NC)"
 	@mkdir -p $(COVERAGE_DIR)
 	@public_functions=$$(grep -E "^[[:space:]]*(function|procedure).*;" src/async_result.ads | grep -v "private" | wc -l | tr -d ' '); \
-	core_tests=$$(grep -c "procedure Test_" tests_crate/comprehensive_test_result.adb 2>/dev/null || echo "0"); \
-	enhanced_tests=$$(grep -c "Test_Enhanced_" tests_crate/comprehensive_test_result.adb 2>/dev/null || echo "0"); \
+	core_tests=$$(grep -c "procedure Test_" tests/comprehensive_test_result.adb 2>/dev/null || echo "0"); \
+	enhanced_tests=$$(grep -c "Test_Enhanced_" tests/comprehensive_test_result.adb 2>/dev/null || echo "0"); \
 	total_test_procedures=$$(($$core_tests + $$enhanced_tests)); \
 	echo "$(GREEN)📈 Public API functions: $$public_functions$(NC)"; \
 	echo "$(GREEN)🧪 Test procedures: $$total_test_procedures$(NC)"; \
@@ -250,7 +250,7 @@ test-coverage-html:
 	@echo "$(BLUE)📊 Generating HTML coverage report...$(NC)"
 	@mkdir -p $(COVERAGE_DIR)
 	@if command -v $(GNATCOV) > /dev/null 2>&1; then \
-		$(GNATCOV) coverage --annotate=html --output-dir=$(COVERAGE_DIR) tests_crate/async_integration_test; \
+		$(GNATCOV) coverage --annotate=html --output-dir=$(COVERAGE_DIR) tests/async_integration_test; \
 		echo "$(GREEN)✅ HTML coverage report generated in $(COVERAGE_DIR)/$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠️  GNATcov not available. Using estimated coverage.$(NC)"; \
@@ -269,7 +269,7 @@ format:
 	@echo "$(BLUE)💅 Formatting source code...$(NC)"
 	@if command -v $(GNATFORMAT) > /dev/null 2>&1; then \
 		find src/ -name "*.ads" -o -name "*.adb" | xargs $(GNATFORMAT) -i; \
-		find tests_crate/ -name "*.ads" -o -name "*.adb" 2>/dev/null | xargs $(GNATFORMAT) -i || true; \
+		find tests/ -name "*.ads" -o -name "*.adb" 2>/dev/null | xargs $(GNATFORMAT) -i || true; \
 		echo "$(GREEN)✅ Source code formatted with $(GNATFORMAT)$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠️  $(GNATFORMAT) not found. Install with: pip install gnatformat$(NC)"; \
@@ -280,7 +280,7 @@ format:
 format-check:
 	@echo "$(BLUE)🔍 Checking if formatting is needed...$(NC)"
 	@if command -v $(GNATFORMAT) > /dev/null 2>&1; then \
-		if $(GNATFORMAT) --check src/*.ads src/*.adb tests_crate/*.ads tests_crate/*.adb 2>/dev/null; then \
+		if $(GNATFORMAT) --check src/*.ads src/*.adb tests/*.ads tests/*.adb 2>/dev/null; then \
 			echo "$(GREEN)✅ Code is properly formatted$(NC)"; \
 		else \
 			echo "$(YELLOW)⚠️  Code needs formatting. Run: make format$(NC)"; \
@@ -336,7 +336,7 @@ docs:
 		echo "$(YELLOW)📝 Documentation overview:$(NC)"; \
 		echo "  - README.md (comprehensive library documentation)"; \
 		echo "  - Source code comments in src/ files"; \
-		echo "  - Test examples in tests_crate/ directory"; \
+		echo "  - Test examples in tests/ directory"; \
 		echo "$(YELLOW)💡 To generate API docs, install gnatdoc or adabrowse$(NC)"; \
 	fi
 
@@ -528,7 +528,7 @@ status:
 	@echo "$(YELLOW)Last commit:$(NC) $$(git log -1 --pretty=format:'%h %s' 2>/dev/null || echo 'N/A')"
 	@echo "$(YELLOW)Working tree:$(NC) $$(git status --porcelain 2>/dev/null | wc -l | xargs echo) uncommitted changes"
 	@echo "$(YELLOW)Source files:$(NC) $$(find src/ -name '*.ad[sb]' | wc -l) files"
-	@echo "$(YELLOW)Test files:$(NC) $$(find tests_crate/ -name '*.ad[sb]' 2>/dev/null | wc -l) files"
+	@echo "$(YELLOW)Test files:$(NC) $$(find tests/ -name '*.ad[sb]' 2>/dev/null | wc -l) files"
 	@echo "$(YELLOW)Build artifacts:$(NC) $$(ls -la obj/ lib/ 2>/dev/null | wc -l || echo 0) items"
 
 .PHONY: env

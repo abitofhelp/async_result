@@ -17,7 +17,7 @@ project Async_Result is
    -- Library type configuration
    type Library_Type_Type is ("relocatable", "static", "static-pic");
    Library_Type : Library_Type_Type :=
-     external ("RESULT_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+     external ("ASYNC_RESULT_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
    for Library_Kind use Library_Type;
 
    -- Compilation configuration

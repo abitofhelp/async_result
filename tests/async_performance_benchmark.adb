@@ -1,5 +1,5 @@
 -- =============================================================================
--- Ada Result Library - Async Performance Benchmarks
+-- Ada Async_Result Library - Async Performance Benchmarks
 -- Copyright (c) 2025 A Bit of Help, Inc.
 -- SPDX-License-Identifier: MIT
 --
@@ -182,19 +182,19 @@ procedure Async_Performance_Benchmark is
             Async_Op_Fast : Fast_Async_Map.Async_Map_Result_Type;
             Async_Op_Medium : Medium_Async_Map.Async_Map_Result_Type;
             Async_Op_Heavy : Heavy_Async_Map.Async_Map_Result_Type;
-            Final_Result : Integer_Result.Result_Type;
+            Final_Result : Fast_Async_Map.New_Result_Type;
          begin
             Integer_Result.Make_Ok (Input_Result, I);
             
             if Use_Fast then
                Fast_Async_Map.Start_Async_Map (Input_Result, Async_Op_Fast);
-               Fast_Async_Map.Wait_For_Result (Async_Op_Fast, Final_Result);
+               Fast_Async_Map.Wait_For_Transformed_Result (Async_Op_Fast, Final_Result);
             elsif Use_Medium then
                Medium_Async_Map.Start_Async_Map (Input_Result, Async_Op_Medium);
-               Medium_Async_Map.Wait_For_Result (Async_Op_Medium, Final_Result);
+               Medium_Async_Map.Wait_For_Transformed_Result (Async_Op_Medium, Final_Result);
             else
                Heavy_Async_Map.Start_Async_Map (Input_Result, Async_Op_Heavy);
-               Heavy_Async_Map.Wait_For_Result (Async_Op_Heavy, Final_Result);
+               Heavy_Async_Map.Wait_For_Transformed_Result (Async_Op_Heavy, Final_Result);
             end if;
          end;
       end loop;
@@ -208,20 +208,20 @@ procedure Async_Performance_Benchmark is
             Async_Op_Fast : Fast_Async_Map.Async_Map_Result_Type;
             Async_Op_Medium : Medium_Async_Map.Async_Map_Result_Type;
             Async_Op_Heavy : Heavy_Async_Map.Async_Map_Result_Type;
-            Final_Result : Integer_Result.Result_Type;
+            Final_Result : Fast_Async_Map.New_Result_Type;
          begin
             Integer_Result.Make_Ok (Input_Result, I);
             Op_Start := Clock;
             
             if Use_Fast then
                Fast_Async_Map.Start_Async_Map (Input_Result, Async_Op_Fast);
-               Fast_Async_Map.Wait_For_Result (Async_Op_Fast, Final_Result);
+               Fast_Async_Map.Wait_For_Transformed_Result (Async_Op_Fast, Final_Result);
             elsif Use_Medium then
                Medium_Async_Map.Start_Async_Map (Input_Result, Async_Op_Medium);
-               Medium_Async_Map.Wait_For_Result (Async_Op_Medium, Final_Result);
+               Medium_Async_Map.Wait_For_Transformed_Result (Async_Op_Medium, Final_Result);
             else
                Heavy_Async_Map.Start_Async_Map (Input_Result, Async_Op_Heavy);
-               Heavy_Async_Map.Wait_For_Result (Async_Op_Heavy, Final_Result);
+               Heavy_Async_Map.Wait_For_Transformed_Result (Async_Op_Heavy, Final_Result);
             end if;
             
             Op_End := Clock;
@@ -349,7 +349,7 @@ procedure Async_Performance_Benchmark is
             declare
                Input_Result : Integer_Result.Result_Type;
                Async_Op : Fast_Async_Map.Async_Map_Result_Type;
-               Final_Result : Integer_Result.Result_Type;
+               Final_Result : Fast_Async_Map.New_Result_Type;
                Op_Start, Op_End : Time;
                Success : Boolean;
             begin
@@ -357,7 +357,7 @@ procedure Async_Performance_Benchmark is
                Op_Start := Clock;
                
                Fast_Async_Map.Start_Async_Map (Input_Result, Async_Op);
-               Fast_Async_Map.Wait_For_Result (Async_Op, Final_Result);
+               Fast_Async_Map.Wait_For_Transformed_Result (Async_Op, Final_Result);
                
                Op_End := Clock;
                Success := Integer_Result.Is_Ok (Final_Result);
